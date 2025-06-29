@@ -29,7 +29,7 @@ Before setting up the bot, ensure you have:
 
 2. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/GhostCMS-Discord-Bot.git
+   git clone https://github.com/Krithiv-7/GhostCMS-Discord-Bot.git
    cd GhostCMS-Discord-Bot
    ```
 
@@ -116,6 +116,10 @@ Before setting up the bot, ensure you have:
 - `/author posts <name> [count]` - Get recent posts by author
 - `/author list` - List all authors
 
+### 🏓 Utility Commands
+- `/ping` - Test bot responsiveness and Ghost CMS connection
+- `/latestposts [count]` - Quick access to latest posts (alias for `/post latest`)
+
 ### ⚙️ Admin Commands (Administrator only)
 - `/admin status` - Bot health and status information
 - `/admin config` - Show current configuration
@@ -144,7 +148,9 @@ ghost-discord-bot/
 ├── commands/           # Slash command definitions
 │   ├── admin.js       # Bot administration
 │   ├── author.js      # Author information
+│   ├── latestposts.js # Quick latest posts alias
 │   ├── page.js        # Static pages
+│   ├── ping.js        # Health check utilities
 │   ├── post.js        # Blog posts
 │   └── tags.js        # Tag management
 ├── config/
@@ -282,9 +288,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📧 **Issues**: [GitHub Issues](https://github.com/your-username/GhostCMS-Discord-Bot/issues)
+- 📧 **Issues**: [GitHub Issues](https://github.com/Krithiv-7/GhostCMS-Discord-Bot/issues)
 - 📖 **Documentation**: This README and inline code comments
-- 💬 **Discord**: Join our community server (link here)
+- 💬 **Discord**: [Join our community server](https://discord.krithiv.dev)
 
 ---
 
