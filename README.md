@@ -25,18 +25,20 @@ Before setting up the bot, ensure you have:
 
 ## 📦 Installation
 
-1. **Clone the repository**
+1. **Fork the repository**
+
+2. **Clone the repository**
    ```bash
    git clone https://github.com/your-username/GhostCMS-Discord-Bot.git
    cd GhostCMS-Discord-Bot
    ```
 
-2. **Install dependencies**
+3. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Configure environment variables**
+4. **Configure environment variables**
    ```bash
    cp .env.example .env
    ```
@@ -58,12 +60,12 @@ Before setting up the bot, ensure you have:
    CHECK_INTERVAL_MINUTES=15
    ```
 
-4. **Deploy slash commands**
+5. **Deploy slash commands**
    ```bash
    npm run deploy-commands
    ```
 
-5. **Start the bot**
+6. **Start the bot**
    ```bash
    npm start
    ```
