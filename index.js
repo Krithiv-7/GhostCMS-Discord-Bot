@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const config = require('./config/config');
 const AutoPoster = require('./scheduler/autoPoster');
+const AnalyticsService = require('./services/analytics');
 
 // Create Discord client
 const client = new Client({ 
@@ -32,8 +33,9 @@ for (const file of commandFiles) {
   }
 }
 
-// Initialize auto-poster
+// Initialize auto-poster and analytics
 let autoPoster;
+let analytics;
 
 // Event: Bot ready
 client.once(Events.ClientReady, async (readyClient) => {
@@ -43,12 +45,15 @@ client.once(Events.ClientReady, async (readyClient) => {
   // Set bot activity
   client.user.setActivity('Ghost CMS posts', { type: 'WATCHING' });
   
-  // Initialize auto-poster
+  // Initialize auto-poster and analytics
   try {
     autoPoster = new AutoPoster(client);
     await autoPoster.initialize();
+    
+    analytics = new AnalyticsService();
+    await analytics.initialize();
   } catch (error) {
-    console.error('Failed to initialize auto-poster:', error);
+    console.error('Failed to initialize services:', error);
   }
   
   console.log('🚀 Bot is ready!');
@@ -65,21 +70,41 @@ client.on(Events.InteractionCreate, async interaction => {
     return;
   }
 
+  const startTime = Date.now();
+  let success = true;
+  let errorMessage = null;
+
   try {
     console.log(`🔧 Executing command: ${interaction.commandName} by ${interaction.user.tag}`);
     await command.execute(interaction);
   } catch (error) {
     console.error('❌ Error executing command:', error);
+    success = false;
+    errorMessage = error.message;
     
-    const errorMessage = {
+    const errorMessage_discord = {
       content: '❌ There was an error while executing this command!',
       ephemeral: true
     };
     
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(errorMessage);
+      await interaction.followUp(errorMessage_discord);
     } else {
-      await interaction.reply(errorMessage);
+      await interaction.reply(errorMessage_discord);
+    }
+  } finally {
+    // Track command usage in analytics
+    if (analytics) {
+      const executionTime = Date.now() - startTime;
+      await analytics.trackCommand(
+        interaction.commandName,
+        interaction.user.id,
+        interaction.guildId,
+        interaction.channelId,
+        executionTime,
+        success,
+        errorMessage
+      ).catch(err => console.error('Analytics tracking error:', err));
     }
   }
 });
@@ -111,6 +136,10 @@ process.on('SIGINT', async () => {
     await autoPoster.cleanup();
   }
   
+  if (analytics) {
+    await analytics.close();
+  }
+  
   client.destroy();
   process.exit(0);
 });
@@ -120,6 +149,10 @@ process.on('SIGTERM', async () => {
   
   if (autoPoster) {
     await autoPoster.cleanup();
+  }
+  
+  if (analytics) {
+    await analytics.close();
   }
   
   client.destroy();

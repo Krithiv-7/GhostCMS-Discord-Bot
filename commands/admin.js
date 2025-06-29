@@ -2,6 +2,9 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { createSuccessEmbed, createErrorEmbed } = require('../utils/embedUtils');
 const { handleAsyncError, getMemoryUsage } = require('../utils/helpers');
 const config = require('../config/config');
+const cache = require('../services/cache');
+const SearchService = require('../services/search');
+const AnalyticsService = require('../services/analytics');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,6 +30,27 @@ module.exports = {
       subcommand
         .setName('toggle-autopost')
         .setDescription('Toggle automatic posting on/off')
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('cache')
+        .setDescription('Manage bot cache')
+        .addStringOption(option =>
+          option
+            .setName('action')
+            .setDescription('Cache action to perform')
+            .addChoices(
+              { name: 'Clear All', value: 'clear' },
+              { name: 'View Stats', value: 'stats' },
+              { name: 'Refresh Search Index', value: 'refresh' }
+            )
+            .setRequired(true)
+        )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('analytics')
+        .setDescription('View quick analytics summary')
     ),
 
   async execute(interaction) {
@@ -49,6 +73,7 @@ module.exports = {
             const uptimeFormatted = formatUptime(uptime);
             const memoryUsage = getMemoryUsage();
             const botUser = interaction.client.user;
+            const cacheStats = cache.getStats();
 
             const statusEmbed = createSuccessEmbed('Bot Status Information')
               .setTitle('🤖 Bot Status')
@@ -61,7 +86,8 @@ module.exports = {
                 { name: '🏓 Ping', value: `${Math.round(interaction.client.ws.ping)}ms`, inline: true },
                 { name: '🔄 Auto-posting', value: config.autoPost.enabled ? '✅ Enabled' : '❌ Disabled', inline: true },
                 { name: '⚡ Node.js', value: process.version, inline: true },
-                { name: '📦 Discord.js', value: require('discord.js').version, inline: true }
+                { name: '📦 Discord.js', value: require('discord.js').version, inline: true },
+                { name: '🗄️ Cache Stats', value: `Main: ${cacheStats.main.keys} keys\nShort: ${cacheStats.short.keys} keys\nLong: ${cacheStats.long.keys} keys`, inline: true }
               )
               .setThumbnail(botUser.displayAvatarURL())
               .setFooter({ text: `Bot ID: ${botUser.id}` });
@@ -135,6 +161,82 @@ module.exports = {
 
             await interaction.editReply({ embeds: [toggleEmbed] });
             await db.close();
+            break;
+
+          case 'cache':
+            const action = interaction.options.getString('action');
+            
+            switch (action) {
+              case 'clear':
+                cache.flushAll();
+                const clearEmbed = createSuccessEmbed('All caches have been cleared')
+                  .setTitle('🗑️ Cache Cleared')
+                  .addFields({
+                    name: 'Status',
+                    value: 'Main, short-term, and long-term caches cleared',
+                    inline: false
+                  });
+                await interaction.editReply({ embeds: [clearEmbed] });
+                break;
+
+              case 'stats':
+                const stats = cache.getStats();
+                const statsEmbed = createSuccessEmbed('Cache Statistics')
+                  .setTitle('📊 Cache Stats')
+                  .addFields(
+                    { name: 'Main Cache', value: `Keys: ${stats.main.keys}\nHits: ${stats.main.hits}\nMisses: ${stats.main.misses}`, inline: true },
+                    { name: 'Short Cache', value: `Keys: ${stats.short.keys}\nHits: ${stats.short.hits}\nMisses: ${stats.short.misses}`, inline: true },
+                    { name: 'Long Cache', value: `Keys: ${stats.long.keys}\nHits: ${stats.long.hits}\nMisses: ${stats.long.misses}`, inline: true }
+                  );
+                await interaction.editReply({ embeds: [statsEmbed] });
+                break;
+
+              case 'refresh':
+                const searchService = new SearchService();
+                await searchService.refreshIndex();
+                const refreshEmbed = createSuccessEmbed('Search index has been refreshed')
+                  .setTitle('🔄 Search Index Refreshed')
+                  .addFields({
+                    name: 'Status',
+                    value: 'Search index rebuilt with latest content',
+                    inline: false
+                  });
+                await interaction.editReply({ embeds: [refreshEmbed] });
+                break;
+            }
+            break;
+
+          case 'analytics':
+            const analytics = new AnalyticsService();
+            await analytics.initialize();
+            
+            try {
+              const summary = await analytics.getAnalyticsSummary(7);
+              
+              const analyticsEmbed = createSuccessEmbed('Quick Analytics Summary')
+                .setTitle('📈 Analytics Overview (7 days)')
+                .addFields(
+                  { 
+                    name: '👥 Users', 
+                    value: `${summary.users?.unique_users || 0} unique users\n${summary.users?.total_commands || 0} total commands`, 
+                    inline: true 
+                  },
+                  { 
+                    name: '🔧 Top Command', 
+                    value: summary.commands?.[0] ? `/${summary.commands[0].command_name}\n${summary.commands[0].usage_count} uses` : 'No data', 
+                    inline: true 
+                  },
+                  { 
+                    name: '🔥 Popular Content', 
+                    value: summary.popularContent?.[0] ? `${summary.popularContent[0].content_title}\n${summary.popularContent[0].interaction_count} views` : 'No data', 
+                    inline: true 
+                  }
+                );
+              
+              await interaction.editReply({ embeds: [analyticsEmbed] });
+            } finally {
+              await analytics.close();
+            }
             break;
 
           default:

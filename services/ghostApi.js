@@ -1,5 +1,6 @@
 const axios = require('axios');
 const config = require('../config/config');
+const cache = require('./cache');
 
 class GhostAPIService {
   constructor() {
@@ -19,12 +20,22 @@ class GhostAPIService {
   }
 
   /**
-   * Get posts from Ghost CMS
+   * Get posts from Ghost CMS with caching
    * @param {Object} options - Query options
    * @returns {Promise<Object>} Posts data
    */
   async getPosts(options = {}) {
     try {
+      // Generate cache key
+      const cacheKey = cache.constructor.generatePostsKey(options);
+      
+      // Check cache first
+      const cachedData = cache.get(cacheKey, 'short');
+      if (cachedData) {
+        console.log(`Cache hit for posts: ${cacheKey}`);
+        return cachedData;
+      }
+
       const params = {
         include: 'tags,authors',
         formats: 'html,plaintext',
@@ -33,6 +44,11 @@ class GhostAPIService {
       };
 
       const response = await this.client.get('/posts/', { params });
+      
+      // Cache the response
+      cache.set(cacheKey, response.data, null, 'short');
+      console.log(`Cached posts data: ${cacheKey}`);
+      
       return response.data;
     } catch (error) {
       console.error('Error fetching posts:', error.message);
@@ -128,12 +144,22 @@ class GhostAPIService {
   }
 
   /**
-   * Get all tags
+   * Get all tags with caching
    * @param {Object} options - Query options
    * @returns {Promise<Object>} Tags data
    */
   async getTags(options = {}) {
     try {
+      // Check cache first for basic tag requests
+      if (Object.keys(options).length === 0) {
+        const cacheKey = cache.constructor.generateTagsKey();
+        const cachedData = cache.get(cacheKey, 'long');
+        if (cachedData) {
+          console.log('Cache hit for tags');
+          return cachedData;
+        }
+      }
+
       const params = {
         include: 'count.posts',
         limit: 'all',
@@ -141,6 +167,14 @@ class GhostAPIService {
       };
 
       const response = await this.client.get('/tags/', { params });
+      
+      // Cache basic tag requests
+      if (Object.keys(options).length === 0) {
+        const cacheKey = cache.constructor.generateTagsKey();
+        cache.set(cacheKey, response.data, null, 'long');
+        console.log('Cached tags data');
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Error fetching tags:', error.message);
@@ -149,12 +183,22 @@ class GhostAPIService {
   }
 
   /**
-   * Get authors
+   * Get authors with caching
    * @param {Object} options - Query options
    * @returns {Promise<Object>} Authors data
    */
   async getAuthors(options = {}) {
     try {
+      // Check cache first for basic author requests
+      if (Object.keys(options).length === 0) {
+        const cacheKey = cache.constructor.generateAuthorsKey();
+        const cachedData = cache.get(cacheKey, 'long');
+        if (cachedData) {
+          console.log('Cache hit for authors');
+          return cachedData;
+        }
+      }
+
       const params = {
         include: 'count.posts',
         limit: 'all',
@@ -162,6 +206,14 @@ class GhostAPIService {
       };
 
       const response = await this.client.get('/authors/', { params });
+      
+      // Cache basic author requests
+      if (Object.keys(options).length === 0) {
+        const cacheKey = cache.constructor.generateAuthorsKey();
+        cache.set(cacheKey, response.data, null, 'long');
+        console.log('Cached authors data');
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Error fetching authors:', error.message);
@@ -189,17 +241,45 @@ class GhostAPIService {
   }
 
   /**
-   * Get site settings
+   * Get site settings with caching
    * @returns {Promise<Object>} Site settings
    */
   async getSettings() {
     try {
+      // Check cache first
+      const cacheKey = cache.constructor.generateSettingsKey();
+      const cachedData = cache.get(cacheKey, 'long');
+      if (cachedData) {
+        console.log('Cache hit for settings');
+        return cachedData;
+      }
+
       const response = await this.client.get('/settings/');
+      
+      // Cache settings for longer period
+      cache.set(cacheKey, response.data, null, 'long');
+      console.log('Cached settings data');
+      
       return response.data;
     } catch (error) {
       console.error('Error fetching settings:', error.message);
       throw new Error('Failed to fetch site settings from Ghost CMS');
     }
+  }
+
+  /**
+   * Clear all caches related to this Ghost instance
+   */
+  clearCache() {
+    cache.flushAll();
+    console.log('Ghost API cache cleared');
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats() {
+    return cache.getStats();
   }
 }
 

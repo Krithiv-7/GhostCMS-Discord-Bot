@@ -8,10 +8,66 @@ A comprehensive Discord bot that integrates with Ghost CMS to share blog posts, 
 - **📄 Page Commands**: Access static pages like About, Contact, etc.
 - **🏷️ Tag Management**: Browse and explore content by tags
 - **👥 Author Information**: Get author bios and their recent posts
-- **🔄 Auto-posting**: Automatically share new blog posts to Discord channels
+- **� Advanced Search**: Fuzzy search across all content with suggestions
+- **�🔄 Auto-posting**: Automatically share new blog posts to Discord channels
 - **⚙️ Admin Controls**: Bot management, configuration, and health monitoring
+- **📊 Analytics & Insights**: Track usage, popular content, and user engagement
+- **⚡ Performance**: Intelligent caching for faster response times
 - **🎨 Rich Embeds**: Beautiful, formatted messages with images and metadata
 - **🔐 Security**: Rate limiting, permission checks, and secure configuration
+
+## 🚀 Advanced Features (Content API Only)
+
+### 🔍 **Intelligent Search System**
+- **Fuzzy matching** with Fuse.js for smart content discovery
+- **Multi-type search** across posts, pages, tags, and authors
+- **Search suggestions** with partial query matching
+- **Popular search terms** tracking and analytics
+- **Search result analytics** for improving content discovery
+
+### ⚡ **Multi-Tier Caching System**
+- **Short-term cache** (2 minutes) for API responses
+- **Main cache** (10 minutes) for general data
+- **Long-term cache** (30 minutes) for settings and tags
+- **Cache management** via admin commands
+- **Performance monitoring** and statistics
+
+### 📊 **Comprehensive Analytics**
+- **Command usage tracking** with success/failure rates
+- **Content interaction analytics** per post/page/tag
+- **Search query analytics** with result tracking  
+- **User activity statistics** and engagement metrics
+- **Daily trends analysis** with historical data
+- **Automated cleanup** of old analytics data
+
+### 📈 **Content Discovery & Insights**
+- **Trending content** based on interaction analytics
+- **Random content discovery** with type filtering
+- **Archive browsing** by year/month with date filtering
+- **Related content suggestions** using tag and author matching
+- **Site statistics** with author rankings and tag usage
+- **Activity monitoring** with posting frequency analysis
+
+### 📧 **Newsletter & Membership Features**
+- **Newsletter content** discovery and management
+- **Membership tier information** with benefits display
+- **Featured/premium content** highlighting
+- **Subscription information** with direct website links
+- **Member-only content previews** (when available)
+
+### 🎛️ **Advanced Admin Tools**
+- **Cache management** (clear, statistics, refresh)
+- **Analytics dashboard** with quick insights
+- **Search index management** and refresh capabilities
+- **Bot health monitoring** with detailed status
+- **Configuration management** with secure display
+
+### 🔄 **Auto-Posting System**
+- **Content API polling** (no webhooks required)
+- **Configurable intervals** for checking new posts
+- **Rich embed formatting** with images and metadata
+- **Post history tracking** to prevent duplicates
+- **Admin toggle controls** for easy management
 
 ## 🛠️ Prerequisites
 
@@ -116,6 +172,36 @@ Before setting up the bot, ensure you have:
 - `/author posts <name> [count]` - Get recent posts by author
 - `/author list` - List all authors
 
+### 🔍 Search Commands
+- `/search all <query> [limit]` - Search across all content types with fuzzy matching
+- `/search posts <query> [limit]` - Search only in blog posts
+- `/search pages <query> [limit]` - Search only in static pages
+- `/search suggestions <partial>` - Get intelligent search suggestions
+- `/search popular` - View popular search terms
+
+### 📊 Content Discovery Commands
+- `/content trending [days]` - Get trending/popular content based on analytics
+- `/content random [type]` - Random content discovery (posts/pages/mixed)
+- `/content archive <year> [month]` - Browse content archive by date
+- `/content related <post_slug>` - Find content related to a specific post
+
+### 📧 Newsletter Commands
+- `/newsletter latest [count]` - Get latest newsletter posts
+- `/newsletter tiers` - Show membership tiers and benefits
+- `/newsletter featured [count]` - Get featured/premium content
+
+### 📈 Statistics Commands
+- `/stats overview` - Get overall site statistics
+- `/stats authors` - Get author statistics and rankings
+- `/stats tags` - Get tag usage statistics
+- `/stats content` - Get content type breakdown
+- `/stats activity [days]` - Get recent activity summary
+
+### 🔔 Subscription Commands
+- `/subscribe info` - Get newsletter subscription information with subscribe button
+- `/subscribe latest` - Get latest newsletter content
+- `/subscribe preview` - Preview subscriber-only content (if available)
+
 ### 🏓 Utility Commands
 - `/ping` - Test bot responsiveness and Ghost CMS connection
 - `/latestposts [count]` - Quick access to latest posts (alias for `/post latest`)
@@ -125,6 +211,16 @@ Before setting up the bot, ensure you have:
 - `/admin config` - Show current configuration
 - `/admin test-ghost` - Test Ghost CMS connection
 - `/admin toggle-autopost` - Enable/disable automatic posting
+- `/admin cache <action>` - Manage bot cache (clear/stats/refresh)
+- `/admin analytics` - Quick analytics overview
+
+### 📊 Analytics Commands (Administrator only)
+- `/analytics summary [days]` - Comprehensive analytics summary
+- `/analytics commands [days]` - Command usage statistics
+- `/analytics content [type] [days]` - Popular content analysis
+- `/analytics searches [days]` - Search query analytics
+- `/analytics trends [days]` - Daily usage trends
+- `/analytics cleanup [keep_days]` - Clean old analytics data
 
 ## 🔄 Auto-posting Feature
 
@@ -146,18 +242,27 @@ The bot will:
 ```
 ghost-discord-bot/
 ├── commands/           # Slash command definitions
-│   ├── admin.js       # Bot administration
+│   ├── admin.js       # Bot administration & cache management
+│   ├── analytics.js   # Usage analytics & insights
 │   ├── author.js      # Author information
+│   ├── content.js     # Content discovery & recommendations
 │   ├── latestposts.js # Quick latest posts alias
+│   ├── newsletter.js  # Newsletter & membership content
 │   ├── page.js        # Static pages
 │   ├── ping.js        # Health check utilities
 │   ├── post.js        # Blog posts
+│   ├── search.js      # Advanced search with fuzzy matching
+│   ├── stats.js       # Site statistics & metrics
+│   ├── subscribe.js   # Newsletter subscription info
 │   └── tags.js        # Tag management
 ├── config/
 │   └── config.js      # Configuration management
 ├── services/
+│   ├── analytics.js   # Analytics tracking & reporting
+│   ├── cache.js       # Multi-tier caching system
 │   ├── database.js    # SQLite database service
-│   └── ghostApi.js    # Ghost CMS API client
+│   ├── ghostApi.js    # Ghost CMS API client with caching
+│   └── search.js      # Advanced search service with Fuse.js
 ├── scheduler/
 │   └── autoPoster.js  # Auto-posting scheduler
 ├── utils/
