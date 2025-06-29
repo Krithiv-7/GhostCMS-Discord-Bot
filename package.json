@@ -1,0 +1,27 @@
+{
+  "name": "ghost-discord-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot that integrates with Ghost CMS to share posts, pages, and manage content",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy-commands": "node deploy-commands.js"
+  },
+  "keywords": ["discord", "bot", "ghost", "cms", "content"],
+  "author": "Krithiv",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2",
+    "node-cron": "^3.0.3",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
