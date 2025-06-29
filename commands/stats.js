@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const GhostAPIService = require('../services/ghostApi');
 const AnalyticsService = require('../services/analytics');
 const { createErrorEmbed, createSuccessEmbed } = require('../utils/embedUtils');
@@ -8,6 +8,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('stats')
     .setDescription('Site statistics and content metrics')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(subcommand =>
       subcommand
         .setName('overview')

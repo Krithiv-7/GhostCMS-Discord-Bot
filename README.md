@@ -180,7 +180,7 @@ Before setting up the bot, ensure you have:
 - `/search popular` - View popular search terms
 
 ### 📊 Content Discovery Commands
-- `/content trending [days]` - Get trending/popular content based on analytics
+- `/content trending [days]` - Get trending/popular content (admins see view counts)
 - `/content random [type]` - Random content discovery (posts/pages/mixed)
 - `/content archive <year> [month]` - Browse content archive by date
 - `/content related <post_slug>` - Find content related to a specific post
@@ -190,7 +190,7 @@ Before setting up the bot, ensure you have:
 - `/newsletter tiers` - Show membership tiers and benefits
 - `/newsletter featured [count]` - Get featured/premium content
 
-### 📈 Statistics Commands
+### 📈 Statistics Commands (Administrator only)
 - `/stats overview` - Get overall site statistics
 - `/stats authors` - Get author statistics and rankings
 - `/stats tags` - Get tag usage statistics

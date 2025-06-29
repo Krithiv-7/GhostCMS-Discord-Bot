@@ -112,11 +112,18 @@ module.exports = {
               .setTitle('📈 Trending Content')
               .setDescription(`Most popular content in the last ${days} days:`);
 
+            // Check if user is admin to show detailed analytics
+            const isAdmin = interaction.memberPermissions?.has('Administrator');
+
             popularContent.slice(0, 10).forEach((content, index) => {
               const emoji = content.content_type === 'post' ? '📰' : '📄';
+              const analyticsInfo = isAdmin 
+                ? `👀 ${content.interaction_count} views • 👥 ${content.unique_users} unique viewers`
+                : '📈 Popular content';
+              
               embed.addFields({
                 name: `${index + 1}. ${emoji} ${content.content_title}`,
-                value: `👀 ${content.interaction_count} views • 👥 ${content.unique_users} unique viewers`,
+                value: analyticsInfo,
                 inline: false
               });
             });
